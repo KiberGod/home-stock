@@ -157,7 +157,10 @@ export function CategoryPage({ id }: { id: string }) {
   const [sort, setSort] = useSortMode('groups');
   const [q, setQ] = useState('');
   const stableItems = useStableQtyOrder();
-  const ents = useEntityDialogs({ onDeleted: () => navigate(href.categories(), { replace: true }) });
+  // deleting a group from the grid keeps us here; only deleting this category leaves the page
+  const ents = useEntityDialogs({
+    onDeleted: (kind, deletedId) => kind === 'category' && deletedId === id && navigate(href.categories(), { replace: true }),
+  });
   const category = data.categories.find((c) => c.id === id);
   if (!category) return <NotFound />;
 
@@ -247,7 +250,8 @@ export function GroupPage({ id }: { id: string }) {
   const group = data.groups.find((g) => g.id === id);
   const category = data.categories.find((c) => c.id === group?.categoryId);
   const ents = useEntityDialogs({
-    onDeleted: () => navigate(category ? href.category(category.id) : href.categories(), { replace: true }),
+    onDeleted: (kind, deletedId) =>
+      kind === 'group' && deletedId === id && navigate(category ? href.category(category.id) : href.categories(), { replace: true }),
   });
   if (!group || !category) return <NotFound />;
 

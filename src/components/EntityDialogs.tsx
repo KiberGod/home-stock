@@ -142,8 +142,11 @@ type Dialog =
   | { kind: 'editGroup'; group: Group }
   | { kind: 'deleteGroup'; group: Group };
 
-/** Shared create/edit/delete dialogs for categories and groups. Render `dialogs` once per page. */
-export function useEntityDialogs(opts: { onDeleted?: () => void } = {}) {
+/**
+ * Shared create/edit/delete dialogs for categories and groups. Render `dialogs` once per page.
+ * `onDeleted` tells which entity was removed, so a page can leave only when it was its own.
+ */
+export function useEntityDialogs(opts: { onDeleted?: (kind: 'category' | 'group', id: string) => void } = {}) {
   const { t, tn } = useI18n();
   const data = useStore((s) => s.data);
   const [dialog, setDialog] = useState<Dialog | null>(null);
@@ -169,7 +172,7 @@ export function useEntityDialogs(opts: { onDeleted?: () => void } = {}) {
         onClose={close}
         onConfirm={() => {
           mutate((d) => deleteCategory(d, c.id), ['categories', 'groups', 'items']);
-          opts.onDeleted?.();
+          opts.onDeleted?.('category', c.id);
         }}
       />
     );
@@ -184,7 +187,7 @@ export function useEntityDialogs(opts: { onDeleted?: () => void } = {}) {
         onClose={close}
         onConfirm={() => {
           mutate((d) => deleteGroup(d, g.id), ['groups', 'items']);
-          opts.onDeleted?.();
+          opts.onDeleted?.('group', g.id);
         }}
       />
     );
